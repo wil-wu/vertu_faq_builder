@@ -2,6 +2,7 @@ from openai import AsyncOpenAI
 
 from .checkers import LLMChecker
 from .enhancers import LLMEnhancer
+from .rewriters import LLMQueryRewriter
 from .enum import EnhancementStrategy
 
 
@@ -36,3 +37,33 @@ class AnswerEnhancementService:
         strategy = await self._check(question, answer)
         enhanced_answer = await self._enhance(question, answer, strategy)
         return enhanced_answer
+
+
+class QueryRewritingService:
+    """问题重写服务"""
+
+    def __init__(self, openai_client: AsyncOpenAI, llm_model: str):
+        """初始化问题重写服务"""
+        self.rewrite_pipeline = [LLMQueryRewriter(openai_client, llm_model)]
+
+    def _flatten_chat_history(self, chat_history: list[dict]) -> str:
+        """扁平化历史对话"""
+        return "\n".join(
+            [
+                f"{idx + 1}. {item['role']}: {item['content']}"
+                for idx, item in enumerate(chat_history)
+            ]
+        )
+
+    async def execute(
+        self, question: str, chat_history: list[dict], rag_context: str
+    ) -> str:
+        """重写问题"""
+        flattened_chat_history = self._flatten_chat_history(chat_history)
+        for rewriter in self.rewrite_pipeline:
+            rewritten_query = await rewriter.rewrite(
+                question, flattened_chat_history, rag_context
+            )
+            if rewritten_query:
+                return rewritten_query
+        return question

@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 from openai import AsyncOpenAI
+from httpx import AsyncClient
 
 from app.config import settings
 from app.scanner import RouterScanner
@@ -25,6 +26,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     app.state.openai_client = AsyncOpenAI(
         api_key=settings.openai_api_key, base_url=settings.openai_base_url
     )
+    app.state.httpx_client = AsyncClient()
 
     logger.info("Application startup completed")
 
@@ -34,6 +36,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Shutting down application")
 
     await app.state.openai_client.close()
+    await app.state.httpx_client.aclose()
 
     logger.info("Application shutdown completed")
 

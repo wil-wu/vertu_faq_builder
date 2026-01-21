@@ -20,7 +20,7 @@ class GlobalSettings(BaseSettings):
     app_version: str = Field(default="1.0.0", description="应用版本")
     app_description: str = Field(default="算法服务API", description="应用描述")
 
-    debug: bool = Field(default=False, description="调试模式")
+    debug: bool = Field(default=True, description="调试模式")
     log_level: str = Field(default="INFO", description="日志级别")
     log_file: str = Field(default="logs/app.log", description="日志文件")
 
