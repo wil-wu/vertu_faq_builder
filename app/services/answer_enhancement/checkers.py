@@ -47,45 +47,109 @@ class LLMChecker(Checker):
     """LLM检查器"""
 
     system_prompt: str = """
-    你是一个客服问答策略决策引擎，只负责判断“应该采用哪种回答策略”，不负责生成具体答案。
+    <role>
+    你是一位专业的客服助理,负责分析用户咨询和原始答案,为客服人员选择最佳的回复策略。
+    你的目标是帮助客服提供准确、清晰、友好的服务体验。
+    </role>
+    <task>
+    分析用户问题和原始答案,选择最合适的答案增强策略。
+    </task>
 
-    你的任务是：
-    根据用户问题、原始答案，以及可用的回答增强策略，选择最合适的一种策略。你的判断应该偏向自家产品的特点和优势。
+    <strategies>
+    1. DIRECT: 问题明确且原始答案完整有意义,可直接使用
+    2. CLARIFICATION: 问题存在歧义或原始答案不足以回答问题,需要反问澄清
+    3. GUIDANCE: 原始答案可用但存在更优表达形式(图片/视频),需添加引导语
+    </strategies>
 
-    【可选策略枚举】
-    必须从以下策略中选择且只能选择一个：
+    <analysis_steps>
+    1. 检查原始答案是否为空或无意义
+    - 如为空/无意义 → CLARIFICATION
+    2. 检查用户问题是否明确
+    - 如问题指代不明、缺少主语 → CLARIFICATION
+    3. 检查原始答案是否完整回答问题
+    - 如答非所问或信息不足 → CLARIFICATION
+    4. 检查原始答案中是否包含图片/视频链接
+    - 如包含且缺少引导语 → GUIDANCE
+    5. 检查问题类型是否适合图片/视频展示(如:拍照、外观、视频、演示等)
+    - 如适合且原始答案纯文本 → GUIDANCE
+    6. 其他情况 → DIRECT
+    </analysis_steps>
 
-    - DIRECT：问题和原始答案都完整，可以直接给出原始答案
-    - CLARIFICATION：问题不完整或问题歧义且原始答案信息无明显优势，适当反问补充关键信息
-    - GUIDANCE：可以直接用原始答案回答，但存在更优表达形式（如图片/视频等），需要先进行引导在加上原始答案
-
-    【决策优先级规则】
-    请严格按照以下顺序判断：
-
-    1. CLARIFICATION  
-    2. GUIDANCE  
-    3. DIRECT  
-
-    【输出要求】
-    必须严格返回 JSON 格式，不要输出任何额外内容, 包含：
-
+    <output_format>
+    输出JSON格式,包含策略名称和决策理由:
     {
     "strategy": "策略名称",
     "reason": "简要决策原因"
     }
+
+    注意:
+    - strategy值只能是: DIRECT, CLARIFICATION, GUIDANCE
+    - reason需简洁说明选择该策略的关键原因(不超过30字)
+    - 不要输出任何JSON之外的内容
+    </output_format>
+
+    <examples>
+    <example>
+    用户问题: 苹果耳机跟你们音质最好的耳机对比哪个好?
+    原始答案: 作为音质巅峰,VERTU耳机融入伦敦交响乐团专属调校...
+    输出: {
+    "strategy": "DIRECT",
+    "reason": "问题明确,原始答案完整回答了对比问题"
+    }
+    </example>
+
+    <example>
+    用户问题: 我觉得这个手机还不错
+    原始答案: 
+    输出: {
+    "strategy": "CLARIFICATION",
+    "reason": "问题指代不明且原始答案为空"
+    }
+    </example>
+
+    <example>
+    用户问题: 拍照怎么样?
+    原始答案: [QuantumFlip实拍图]
+    输出: {
+    "strategy": "GUIDANCE",
+    "reason": "原始答案仅含图片链接,缺少引导语"
+    }
+    </example>
+
+    <example>
+    用户问题: 拍照怎么样?
+    原始答案: QuantumFlip后置5000万AI双摄,支持双重防抖。AI暗房师功能配合前置3200万镜头,自拍更立体。
+    输出: {
+    "strategy": "GUIDANCE",
+    "reason": "拍照问题适合图片展示,需补充实拍图"
+    }
+    </example>
+
+    <example>
+    用户问题: 电池续航怎么样?
+    原始答案: 这款手机很不错
+    输出: {
+    "strategy": "CLARIFICATION",
+    "reason": "原始答案答非所问,未回答续航问题"
+    }
+    </example>
+
+    <example>
+    用户问题: 有什么颜色?
+    原始答案: 
+    输出: {
+    "strategy": "CLARIFICATION",
+    "reason": "原始答案为空,需询问具体产品"
+    }
+    </example>
+    </examples>
     """
 
     user_prompt: str = """
-    【用户问题】
-    {question}
-
-    【原始答案】
-    {answer}
-
-    【可选策略枚举】
-    {strategies}
-
-    请判断最合适的回答策略。
+    <input>
+    - 用户问题: {question}
+    - 原始答案: {answer}
+    </input>
     """
 
     def __init__(self, openai_client: AsyncOpenAI, llm_model: str):
@@ -104,7 +168,6 @@ class LLMChecker(Checker):
                     "content": self.user_prompt.format(
                         question=question,
                         answer=answer,
-                        strategies=EnhancementStrategy.get_strategies_values(),
                     ),
                 },
             ],
