@@ -6,5 +6,8 @@ from .config import enhancement_service_settings
 
 def get_answer_enhancement_service(request: Request) -> AnswerEnhancementService:
     return AnswerEnhancementService(
-        request.app.state.openai_client, enhancement_service_settings.llm_model
+        request.app.state.openai_client,
+        enhancement_service_settings.llm_model,
+        enhancement_service_settings.checker_temperature,
+        enhancement_service_settings.enhancer_temperature,
     )

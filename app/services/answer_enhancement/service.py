@@ -8,10 +8,20 @@ from .enum import EnhancementStrategy
 class AnswerEnhancementService:
     """答案增强服务"""
 
-    def __init__(self, openai_client: AsyncOpenAI, llm_model: str):
+    def __init__(
+        self,
+        openai_client: AsyncOpenAI,
+        llm_model: str,
+        checker_temperature: float,
+        enhancer_temperature: float,
+    ):
         """初始化答案增强服务"""
-        self.check_pipeline = [LLMChecker(openai_client, llm_model)]
-        self.enhance_pipeline = [LLMEnhancer(openai_client, llm_model)]
+        self.check_pipeline = [
+            LLMChecker(openai_client, llm_model, checker_temperature)
+        ]
+        self.enhance_pipeline = [
+            LLMEnhancer(openai_client, llm_model, enhancer_temperature)
+        ]
 
     async def _check(self, question: str, answer: str) -> EnhancementStrategy:
         """策略判断"""

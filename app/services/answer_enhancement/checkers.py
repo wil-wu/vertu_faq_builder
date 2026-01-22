@@ -152,10 +152,13 @@ class LLMChecker(Checker):
     </input>
     """
 
-    def __init__(self, openai_client: AsyncOpenAI, llm_model: str):
+    def __init__(
+        self, openai_client: AsyncOpenAI, llm_model: str, temperature: float = 0.01
+    ):
         """初始化LLM检查器"""
         self.client = openai_client
         self.llm_model = llm_model
+        self.temperature = temperature
 
     async def check(self, question: str, answer: str) -> EnhancementStrategy:
         """策略判断"""
@@ -171,6 +174,7 @@ class LLMChecker(Checker):
                     ),
                 },
             ],
+            temperature=self.temperature,
         )
         content = response.choices[0].message.content.strip()
         logger.info(f"{self.__class__.__name__} response content: {content}")

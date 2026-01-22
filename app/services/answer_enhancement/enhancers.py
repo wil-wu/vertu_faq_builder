@@ -124,10 +124,13 @@ class LLMEnhancer(Enhancer):
     </input>
     """
 
-    def __init__(self, openai_client: AsyncOpenAI, llm_model: str):
+    def __init__(
+        self, openai_client: AsyncOpenAI, llm_model: str, temperature: float = 0.3
+    ):
         """初始化LLM增强器"""
         self.client = openai_client
         self.llm_model = llm_model
+        self.temperature = temperature
 
     async def enhance(
         self, question: str, answer: str, strategy: EnhancementStrategy
@@ -144,6 +147,7 @@ class LLMEnhancer(Enhancer):
                     ),
                 },
             ],
+            temperature=self.temperature,
         )
         content = response.choices[0].message.content.strip()
         logger.info(f"{self.__class__.__name__} response content: {content}")
