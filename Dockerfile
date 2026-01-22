@@ -7,11 +7,11 @@ RUN apk add --no-cache tzdata && \
 
 ENV TZ=Asia/Shanghai
 
-COPY . /vertu_algorithm_service
+COPY . /vertu/src
 
 ENV UV_NO_DEV=1
 
-WORKDIR /vertu_algorithm_service
+WORKDIR /vertu/src
 RUN uv sync --locked
 
 CMD ["uv", "run", "main.py"]

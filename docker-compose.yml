@@ -11,7 +11,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./:/vertu_algorithm_service
+      - ./:/vertu/src
+      - /vertu/src/.venv
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
