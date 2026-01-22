@@ -14,9 +14,6 @@ class AnswerEnhancementSettings(BaseSettings):
 
     # 模型配置
     llm_model: str = Field(default="kimi-k2-turbo-preview", description="LLM模型")
-    faq_url: str = Field(
-        default="http://192.168.151.84:8001/api/search", description="FAQ URL"
-    )
 
 
 enhancement_service_settings = AnswerEnhancementSettings()

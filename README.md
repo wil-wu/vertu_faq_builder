@@ -35,10 +35,8 @@ algorithm-service/
 │           ├── enhancers.py      # 定向策略增强器
 │           ├── enum.py           # 策略枚举
 │           ├── models.py         # Pydantic 模型
-|           ├── rewriters.py      # 问题重写
 │           ├── router.py         # API 路由
-│           ├── service.py        # 业务逻辑
-│           └── utils.py          # 工具函数
+│           └── service.py        # 业务逻辑
 └── tests/                        # 测试
     ├── conftest.py               # 测试配置
     └── services/                 # 服务测试
