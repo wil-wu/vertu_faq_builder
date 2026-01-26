@@ -23,6 +23,7 @@ class GlobalSettings(BaseSettings):
     debug: bool = Field(default=True, description="调试模式")
     log_level: str = Field(default="INFO", description="日志级别")
     log_file: str = Field(default="logs/app.log", description="日志文件")
+    log_request_body_length: int = Field(default=1024, description="请求体日志长度")
 
     # 服务器配置
     host: str = Field(default="0.0.0.0", description="API 主机")

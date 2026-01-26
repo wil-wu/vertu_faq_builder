@@ -13,6 +13,7 @@ from httpx import AsyncClient
 
 from app.config import settings
 from app.scanner import RouterScanner
+from app.core.middlewares import RequestLoggingMiddleware
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +59,14 @@ def create_app() -> FastAPI:
         allow_credentials=settings.cors_credentials,
         allow_methods=settings.cors_methods,
         allow_headers=settings.cors_headers,
+    )
+
+    # 配置请求日志中间件
+    app.add_middleware(
+        RequestLoggingMiddleware,
+        log_request_body=settings.debug,  # 仅在调试模式下记录请求体
+        log_request_body_length=settings.log_request_body_length,  # 请求体日志长度
+        exclude_paths=["/health", "/metrics"],  # 排除健康检查和指标端点
     )
 
     # 配置 Prometheus 监控
