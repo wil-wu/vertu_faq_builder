@@ -52,7 +52,7 @@ class AnswerEnhancementService:
             extracted_answer = await extractor.extract(question, answer)
             if extracted_answer:
                 return extracted_answer
-        return ''
+        return ""
 
     async def execute(self, question: str, answer: str) -> str:
         """策略判断并增强答案"""

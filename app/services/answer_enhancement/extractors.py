@@ -222,14 +222,15 @@ class LLMExtractor(Extractor):
             model=self.llm_model,
             messages=[
                 {
-                    "role": "system", "content": self.system_prompt,
+                    "role": "system",
+                    "content": self.system_prompt,
                 },
                 {
                     "role": "user",
                     "content": self.user_prompt.format(
                         question=question, answer=answer
                     ),
-                }
+                },
             ],
             temperature=self.temperature,
         )
