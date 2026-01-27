@@ -206,7 +206,7 @@ class LLMChecker(Checker):
             temperature=self.temperature,
         )
         content = response.choices[0].message.content.strip()
-        logger.info(f"{self.__class__.__name__} response content: {content}")
+        logger.debug(f"{self.__class__.__name__} response content: {content}")
 
         check_result = json.loads(content)
         return EnhancementStrategy.get_strategy(check_result["strategy"].lower())

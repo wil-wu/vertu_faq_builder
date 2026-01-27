@@ -197,6 +197,6 @@ class LLMEnhancer(Enhancer):
             temperature=self.temperature,
         )
         content = response.choices[0].message.content.strip()
-        logger.info(f"{self.__class__.__name__} response content: {content}")
+        logger.debug(f"{self.__class__.__name__} response content: {content}")
 
         return content
