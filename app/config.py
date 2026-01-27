@@ -55,6 +55,11 @@ class GlobalSettings(BaseSettings):
         default="https://api.moonshot.cn/v1", description="OpenAI API 基础 URL"
     )
 
+    # Sentence Transformer 配置
+    sentence_transformer_model: str = Field(
+        default=".huggingface/bge-large-zh-v1.5", description="Sentence Transformer 模型"
+    )
+
 
 settings = GlobalSettings()
 

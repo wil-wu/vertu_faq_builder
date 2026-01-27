@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 from openai import AsyncOpenAI
 from httpx import AsyncClient
+from sentence_transformers import SentenceTransformer
 
 from app.config import settings
 from app.scanner import RouterScanner
@@ -28,6 +29,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         api_key=settings.openai_api_key, base_url=settings.openai_base_url
     )
     app.state.httpx_client = AsyncClient()
+    app.state.sentence_transformer = SentenceTransformer(
+       settings.sentence_transformer_model
+    )
 
     logger.info("Application startup completed")
 
