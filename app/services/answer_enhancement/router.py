@@ -15,18 +15,31 @@ router = APIRouter(
 
 @router.post("/enhance")
 async def answer_enhancement(
-    body: AnswerEnhancementBody,
+    body: AnswerEnhancementBody | list[AnswerEnhancementBody],
     answer_enhancement_service: AnswerEnhancementService = Depends(
         get_answer_enhancement_service
     ),
 ) -> dict:
     """答案增强"""
-    enhanced_answer = await answer_enhancement_service.execute(
-        question=body.question, answer=body.answer
-    )
+    enhanced_answers = []
+
+    if isinstance(body, list):
+        for item in body:
+            enhanced_answer = await answer_enhancement_service.execute(
+                question=item.question, answer=item.answer
+            )
+            enhanced_answers.append(enhanced_answer)
+    else:
+        enhanced_answer = await answer_enhancement_service.execute(
+            question=body.question, answer=body.answer
+        )
+        enhanced_answers.append(enhanced_answer)
 
     return {
         "code": 200,
         "message": "success",
-        "data": {"enhanced_answer": enhanced_answer},
+        "data": {
+            "total": len(enhanced_answers),
+            "enhanced_answers": enhanced_answers,
+        },
     }
