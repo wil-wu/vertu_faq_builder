@@ -208,5 +208,10 @@ class LLMChecker(Checker):
         content = response.choices[0].message.content.strip()
         logger.debug(f"{self.__class__.__name__} response content: {content}")
 
-        check_result = json.loads(content)
-        return EnhancementStrategy.get_strategy(check_result["strategy"].lower())
+        try:
+            check_result = json.loads(content)
+        except json.JSONDecodeError:
+            logger.error(f"{self.__class__.__name__} response content is not a valid JSON: {content}")
+            return EnhancementStrategy.DIRECT
+            
+        return EnhancementStrategy.get_strategy(check_result.get("strategy", "direct").lower())

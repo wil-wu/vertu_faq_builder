@@ -254,4 +254,10 @@ class LLMQAGenerator(QAGenerator):
         content = response.choices[0].message.content.strip()
         logger.debug(f"{self.__class__.__name__} response content: {content}")
 
-        return json.loads(content)
+        try:
+            generator_result = json.loads(content)
+        except json.JSONDecodeError:
+            logger.error(f"{self.__class__.__name__} response content is not a valid JSON: {content}")
+            return []
+
+        return generator_result

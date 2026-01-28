@@ -237,5 +237,10 @@ class LLMExtractor(Extractor):
         content = response.choices[0].message.content.strip()
         logger.debug(f"{self.__class__.__name__} response content: {content}")
 
-        extract_result = json.loads(content)
-        return extract_result["description"]
+        try:
+            extract_result = json.loads(content)
+        except json.JSONDecodeError:
+            logger.error(f"{self.__class__.__name__} response content is not a valid JSON: {content}")
+            return ""
+        
+        return extract_result.get("description", "")
