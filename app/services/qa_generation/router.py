@@ -7,6 +7,7 @@ from fastapi.responses import Response
 from .service import QAGenerationService
 from .deps import get_qa_generation_service
 from .models import QAGenerationBody
+from .config import qa_generation_service_settings
 
 router = APIRouter(
     prefix="/api/v1/qa",
@@ -21,12 +22,16 @@ async def _generate_qa(
     contexts = []
     for record in records:
         contents = record.get("消息内容", [])
+        if not isinstance(contents, list):
+            continue
         context = "\n".join(
             [
-                f"{content.get('sender', '')}: {content.get('content', '')}"
-                for content in contents
+                f"{idx + 1}. {content.get('sender', '').replace('\n', '')}: {content.get('content', '').replace('\n', '')}"
+                for idx, content in enumerate(contents)
             ]
         )
+        if len(context) > qa_generation_service_settings.max_context_length:
+            context = context[:qa_generation_service_settings.max_context_length]
         contexts.append(context)
 
     qas = await qa_generation_service.generate_qa(contexts)

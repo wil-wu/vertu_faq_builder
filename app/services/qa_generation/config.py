@@ -32,5 +32,6 @@ class QAGenerationServiceSettings(BaseSettings):
         ],
         description="过滤规则",
     )
+    max_context_length: int = Field(default=32 * 1024, description="最大上下文长度")
 
 qa_generation_service_settings = QAGenerationServiceSettings()
