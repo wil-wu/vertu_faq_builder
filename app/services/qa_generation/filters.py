@@ -135,7 +135,9 @@ class LLMFilter(Filter):
         try:
             filter_result = json.loads(content)
         except json.JSONDecodeError:
-            logger.error(f"{self.__class__.__name__} response content is not a valid JSON: {content}")
+            logger.error(
+                f"{self.__class__.__name__} response content is not a valid JSON: {content}"
+            )
             return True
 
         return filter_result.get("keep", True)

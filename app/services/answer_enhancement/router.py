@@ -40,23 +40,23 @@ async def answer_enhancement(
         )
         enhanced_answers.append(enhanced_answer)
 
-    content = orjson.dumps({
-        "code": 200,
-        "message": "success",
-        "data": {
-            "total": len(enhanced_answers),
-            "enhanced_answers": enhanced_answers,
-        },
-    })
+    content = orjson.dumps(
+        {
+            "code": 200,
+            "message": "success",
+            "data": {
+                "total": len(enhanced_answers),
+                "enhanced_answers": enhanced_answers,
+            },
+        }
+    )
 
     if return_file:
         filename = f"enhanced_answers_{datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
         return Response(
-            content=content, 
+            content=content,
             media_type="application/octet-stream",
-            headers={
-                "Content-Disposition": f'attachment; filename="{filename}"'
-            }
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
         )
     else:
         return Response(content=content, media_type="application/json")

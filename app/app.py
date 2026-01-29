@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     )
     app.state.httpx_client = AsyncClient()
     app.state.sentence_transformer = SentenceTransformer(
-       settings.sentence_transformer_model
+        settings.sentence_transformer_model
     )
 
     logger.info("Application startup completed")

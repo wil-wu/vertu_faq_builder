@@ -57,7 +57,8 @@ class GlobalSettings(BaseSettings):
 
     # Sentence Transformer 配置
     sentence_transformer_model: str = Field(
-        default=".huggingface/bge-large-zh-v1.5", description="Sentence Transformer 模型"
+        default=".huggingface/bge-large-zh-v1.5",
+        description="Sentence Transformer 模型",
     )
 
 

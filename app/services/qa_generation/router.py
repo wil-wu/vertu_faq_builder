@@ -31,7 +31,7 @@ async def _generate_qa(
             ]
         )
         if len(context) > qa_generation_service_settings.max_context_length:
-            context = context[:qa_generation_service_settings.max_context_length]
+            context = context[: qa_generation_service_settings.max_context_length]
         contexts.append(context)
 
     qas = await qa_generation_service.generate_qa(contexts)
@@ -57,20 +57,20 @@ async def generate_qa_from_body(
         }
 
     qas = await _generate_qa(records, metadata, qa_generation_service)
-    content = orjson.dumps({
-        "code": 200,
-        "message": "success",
-        "data": {"qas": qas, "total": len(qas)},
-    })
+    content = orjson.dumps(
+        {
+            "code": 200,
+            "message": "success",
+            "data": {"qas": qas, "total": len(qas)},
+        }
+    )
 
     if return_file:
         filename = f"qa_{datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
         return Response(
-            content=content, 
+            content=content,
             media_type="application/octet-stream",
-            headers={
-                "Content-Disposition": f'attachment; filename="{filename}"'
-            }
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
         )
     else:
         return Response(content=content, media_type="application/json")
@@ -91,20 +91,20 @@ async def generate_qa_from_file(
     }
 
     qas = await _generate_qa(records, metadata, qa_generation_service)
-    content = orjson.dumps({
-        "code": 200,
-        "message": "success",
-        "data": {"qas": qas, "total": len(qas)},
-    })
+    content = orjson.dumps(
+        {
+            "code": 200,
+            "message": "success",
+            "data": {"qas": qas, "total": len(qas)},
+        }
+    )
 
     if return_file:
         filename = f"qa_{datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
         return Response(
-            content=content, 
+            content=content,
             media_type="application/octet-stream",
-            headers={
-                "Content-Disposition": f'attachment; filename="{filename}"'
-            }
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
         )
     else:
         return Response(content=content, media_type="application/json")

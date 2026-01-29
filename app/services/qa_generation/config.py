@@ -25,7 +25,7 @@ class QAGenerationServiceSettings(BaseSettings):
     filter_rules: list[dict] = Field(
         default=[
             {
-                "question_condition": f"({"|".join(ProductType.get_product_types_values())})(?!.*戒指)",
+                "question_condition": f"({'|'.join(ProductType.get_product_types_values())})(?!.*戒指)",
                 "answer_condition": "",
                 "intent_condition": f"{Intent.PRODUCT_FUNCTION.value}|{Intent.PRODUCT_CATEGORY.value}",
             },
@@ -33,5 +33,6 @@ class QAGenerationServiceSettings(BaseSettings):
         description="过滤规则",
     )
     max_context_length: int = Field(default=32 * 1024, description="最大上下文长度")
+
 
 qa_generation_service_settings = QAGenerationServiceSettings()
