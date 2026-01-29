@@ -47,7 +47,9 @@ class LLMQAGenerator(QAGenerator):
     ## 四、输入输出格式
 
     **输入:**
-    [{"sender": "客户"|"客服", "content": "消息内容", "time": "YYYY-MM-DD HH:MM:SS"}]
+    1. 客户: 消息内容
+    2. 客服: 消息内容
+    ...
 
     **输出:**
     [{"question": "完整问题", "answer": "标准化答案", "intent": "意图分类"}]
@@ -146,12 +148,10 @@ class LLMQAGenerator(QAGenerator):
     ### 示例1: 标准处理
 
     **输入:**
-    [
-    {"sender": "客户", "content": "DW Classic Petite 28mm石英表", "time": "10:00:15"},
-    {"sender": "客户", "content": "这款防水吗", "time": "10:00:30"},
-    {"sender": "客服", "content": "支持3ATM防水", "time": "10:00:40"},
-    {"sender": "客服", "content": "可以日常洗手佩戴", "time": "10:00:45"}
-    ]
+    1. 客户: DW Classic Petite 28mm石英表
+    2. 客户: 这款防水吗
+    3. 客服: 支持3ATM防水
+    4. 客服: 可以日常洗手佩戴
 
     **输出:**
     [
@@ -165,10 +165,8 @@ class LLMQAGenerator(QAGenerator):
     ### 示例2: 无法还原 → 不提取
 
     **输入:**
-    [
-    {"sender": "客户", "content": "在吗", "time": "11:00:00"},
-    {"sender": "客户", "content": "这个多少钱", "time": "11:00:10"}
-    ]
+    1. 客户: 在吗
+    2. 客户: 这个多少钱
 
     **输出:**
     []
@@ -177,13 +175,11 @@ class LLMQAGenerator(QAGenerator):
     ### 示例3: 部分有效
 
     **输入:**
-    [
-    {"sender": "客户", "content": "Fossil Gen 6智能手表有货吗", "time": "12:00:00"},
-    {"sender": "客服", "content": "有货的,今天就能发货", "time": "12:00:10"},
-    {"sender": "客户", "content": "它防水吗", "time": "12:00:20"},
-    {"sender": "客服", "content": "支持5ATM防水", "time": "12:00:30"},
-    {"sender": "客户", "content": "那个呢", "time": "12:00:40"}
-    ]
+    1. 客户: Fossil Gen 6智能手表有货吗
+    2. 客服: 有货的,今天就能发货
+    3. 客户: 它防水吗
+    4. 客服: 支持5ATM防水
+    5. 客户: 那个呢
 
     **输出:**
     [
