@@ -3,8 +3,6 @@ from abc import ABC, abstractmethod
 
 from openai import AsyncOpenAI
 
-from .enum import EnhancementStrategy
-
 logger = logging.getLogger(__name__)
 
 
@@ -12,7 +10,7 @@ class Enhancer(ABC):
     """增强器抽象基类"""
 
     @abstractmethod
-    def enhance(self, question: str, answer: str) -> str:
+    def enhance(self, question: str, answer: str, strategy: str) -> str:
         """增强答案"""
         raise NotImplementedError
 
@@ -179,9 +177,7 @@ class LLMEnhancer(Enhancer):
         self.llm_model = llm_model
         self.temperature = temperature
 
-    async def enhance(
-        self, question: str, answer: str, strategy: EnhancementStrategy
-    ) -> str:
+    async def enhance(self, question: str, answer: str, strategy: str) -> str:
         """增强答案"""
         response = await self.client.chat.completions.create(
             model=self.llm_model,
@@ -190,7 +186,7 @@ class LLMEnhancer(Enhancer):
                 {
                     "role": "user",
                     "content": self.user_prompt.format(
-                        question=question, answer=answer, strategy=strategy.value
+                        question=question, answer=answer, strategy=strategy
                     ),
                 },
             ],

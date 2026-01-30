@@ -5,8 +5,6 @@ from typing import Any
 
 from openai import AsyncOpenAI
 
-from .enum import EnhancementStrategy
-
 logger = logging.getLogger(__name__)
 
 
@@ -14,7 +12,7 @@ class Checker(ABC):
     """检查器抽象基类"""
 
     @abstractmethod
-    def check(self, question: str, answer: str) -> EnhancementStrategy:
+    def check(self, question: str, answer: str) -> str:
         """策略判断"""
         raise NotImplementedError
 
@@ -26,9 +24,9 @@ class RuleChecker(Checker):
         """初始化规则检查器"""
         self.rules = rules
 
-    def check(self, question: str, answer: str) -> EnhancementStrategy:
+    def check(self, question: str, answer: str) -> str:
         """策略判断"""
-        return EnhancementStrategy.DIRECT
+        return ""
 
 
 class MLChecker(Checker):
@@ -38,9 +36,9 @@ class MLChecker(Checker):
         """初始化机器学习模型检查器"""
         self.model = model
 
-    def check(self, question: str, answer: str) -> EnhancementStrategy:
+    def check(self, question: str, answer: str) -> str:
         """策略判断"""
-        return EnhancementStrategy.DIRECT
+        return ""
 
 
 class LLMChecker(Checker):
@@ -189,7 +187,7 @@ class LLMChecker(Checker):
         self.llm_model = llm_model
         self.temperature = temperature
 
-    async def check(self, question: str, answer: str) -> EnhancementStrategy:
+    async def check(self, question: str, answer: str) -> str:
         """策略判断"""
         response = await self.client.chat.completions.create(
             model=self.llm_model,
@@ -214,8 +212,6 @@ class LLMChecker(Checker):
             logger.error(
                 f"{self.__class__.__name__} response content is not a valid JSON: {content}"
             )
-            return EnhancementStrategy.DIRECT
+            return ""
 
-        return EnhancementStrategy.get_strategy(
-            check_result.get("strategy", "direct").lower()
-        )
+        return check_result.get("strategy", "")

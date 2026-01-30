@@ -1,9 +1,13 @@
+import logging
+
 from openai import AsyncOpenAI
 
 from .checkers import LLMChecker
 from .enhancers import LLMEnhancer
 from .extractors import LLMExtractor
 from .enum import EnhancementStrategy
+
+logger = logging.getLogger(__name__)
 
 
 class AnswerEnhancementService:
@@ -32,13 +36,17 @@ class AnswerEnhancementService:
         """策略判断"""
         for checker in self.check_pipeline:
             strategy = await checker.check(question, answer)
-            if strategy:
+            try:
+                strategy = EnhancementStrategy.get_strategy(strategy)
                 return strategy
+            except ValueError:
+                logger.error(
+                    f"{checker.__class__.__name__} strategy is not a valid strategy: {strategy}"
+                )
+
         return EnhancementStrategy.DIRECT
 
-    async def _enhance(
-        self, question: str, answer: str, strategy: EnhancementStrategy
-    ) -> str:
+    async def _enhance(self, question: str, answer: str, strategy: str) -> str:
         """根据策略增强答案"""
         for enhancer in self.enhance_pipeline:
             enhanced_answer = await enhancer.enhance(question, answer, strategy)
@@ -57,7 +65,7 @@ class AnswerEnhancementService:
     async def execute(self, question: str, answer: str) -> str:
         """策略判断并增强答案"""
         strategy = await self._check(question, answer)
-        enhanced_answer = await self._enhance(question, answer, strategy)
+        enhanced_answer = await self._enhance(question, answer, strategy.value)
         if strategy == EnhancementStrategy.GUIDANCE:
             guidance_answer = await self._extract(question, answer)
             return f"{enhanced_answer}[{guidance_answer}]"
