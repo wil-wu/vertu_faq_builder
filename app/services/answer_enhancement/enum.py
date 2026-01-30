@@ -11,7 +11,7 @@ class EnhancementStrategy(Enum):
     @classmethod
     def get_strategy(cls, strategy: str) -> "EnhancementStrategy":
         """获取增强策略"""
-        return cls(strategy)
+        return cls(strategy.lower())
 
     @classmethod
     def get_strategies_values(cls) -> list[str]:

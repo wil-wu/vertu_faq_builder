@@ -21,7 +21,7 @@ class Intent(Enum):
     @classmethod
     def get_intent(cls, intent: str) -> "Intent":
         """获取意图分类"""
-        return cls(intent)
+        return cls(intent.lower())
 
     @classmethod
     def get_intents_values(cls) -> list[str]:
@@ -44,7 +44,7 @@ class ProductType(Enum):
     @classmethod
     def get_product_type(cls, product_type: str) -> "ProductType":
         """获取产品类型"""
-        return cls(product_type)
+        return cls(product_type.lower())
 
     @classmethod
     def get_product_types_values(cls) -> list[str]:
