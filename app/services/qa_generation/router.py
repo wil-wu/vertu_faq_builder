@@ -34,10 +34,10 @@ async def _generate_qa(
             context = context[: qa_generation_service_settings.max_context_length]
         contexts.append(context)
 
-    qas = await qa_generation_service.generate_qa(contexts)
-    for qa_pair in qas:
+    qas_result = await qa_generation_service.generate_qa(contexts)
+    for qa_pair in qas_result["qas"]:
         qa_pair["metadata"] = metadata
-    return qas
+    return qas_result
 
 
 @router.post("/generate_from_body", response_model=None)
@@ -56,12 +56,12 @@ async def generate_qa_from_body(
             "datetime": datetime.now().isoformat(),
         }
 
-    qas = await _generate_qa(records, metadata, qa_generation_service)
+    qas_result = await _generate_qa(records, metadata, qa_generation_service)
     content = orjson.dumps(
         {
             "code": 200,
             "message": "success",
-            "data": {"qas": qas, "total": len(qas)},
+            "data": qas_result,
         }
     )
 
@@ -90,12 +90,12 @@ async def generate_qa_from_file(
         "datetime": datetime.now().isoformat(),
     }
 
-    qas = await _generate_qa(records, metadata, qa_generation_service)
+    qas_result = await _generate_qa(records, metadata, qa_generation_service)
     content = orjson.dumps(
         {
             "code": 200,
             "message": "success",
-            "data": {"qas": qas, "total": len(qas)},
+            "data": qas_result,
         }
     )
 

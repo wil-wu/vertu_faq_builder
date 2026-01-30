@@ -58,20 +58,30 @@ class QAGenerationService:
 
     async def generate_qa(self, contexts: list[str]) -> list[dict]:
         """生成并处理QA对"""
-        qas = []
+        generated_qas = []
 
         # 生成候选QA对
         for context in contexts:
             qa_pairs = await self._generate(context)
-            qas.extend(qa_pairs)
-        logger.info(f"{self.__class__.__name__} generated qas: {len(qas)}")
+            generated_qas.extend(qa_pairs)
+        logger.info(f"{self.__class__.__name__} generated qas: {len(generated_qas)}")
 
         # 过滤候选QA对
-        qas = [qa_pair for qa_pair in qas if await self._filter(qa_pair)]
-        logger.info(f"{self.__class__.__name__} filtered qas: {len(qas)}")
+        filtered_qas = [
+            qa_pair for qa_pair in generated_qas if await self._filter(qa_pair)
+        ]
+        logger.info(f"{self.__class__.__name__} filtered qas: {len(filtered_qas)}")
 
         # 后处理候选QA对
-        qas = await self._post_process(qas)
-        logger.info(f"{self.__class__.__name__} post processed qas: {len(qas)}")
+        post_processed_qas = await self._post_process(filtered_qas)
+        logger.info(
+            f"{self.__class__.__name__} post processed qas: {len(post_processed_qas)}"
+        )
 
-        return qas
+        return {
+            "generated_count": len(generated_qas),
+            "filtered_count": len(filtered_qas),
+            "post_processed_count": len(post_processed_qas),
+            "total": len(post_processed_qas),
+            "qas": post_processed_qas,
+        }
