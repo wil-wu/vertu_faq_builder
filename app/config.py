@@ -61,6 +61,12 @@ class GlobalSettings(BaseSettings):
         description="Sentence Transformer 模型",
     )
 
+    # Database 配置
+    database_url: str = Field(
+        default="sqlite+aiosqlite:///db.sqlite3",
+        description="数据库 URL",
+    )
+
 
 settings = GlobalSettings()
 

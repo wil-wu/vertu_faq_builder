@@ -4,9 +4,10 @@ import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+import orjson
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from prometheus_fastapi_instrumentator import Instrumentator
 from openai import AsyncOpenAI
 from httpx import AsyncClient
@@ -15,6 +16,8 @@ from sentence_transformers import SentenceTransformer
 from app.config import settings
 from app.scanner import RouterScanner
 from app.core.middlewares import RequestLoggingMiddleware
+from app.core.database import Base, async_engine
+from app.core.managers import async_job_manager
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +27,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """应用生命周期管理"""
     # 启动时执行
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+
+    # 初始化数据库表
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
     app.state.openai_client = AsyncOpenAI(
         api_key=settings.openai_api_key, base_url=settings.openai_base_url
@@ -120,6 +127,50 @@ def create_app() -> FastAPI:
 
         routes = scanner.get_registered_routes()
         return {"total": len(routes), "routes": routes}
+
+    @app.get("/jobs/{job_id}")
+    async def get_async_job(job_id: str) -> Response:
+        job = await async_job_manager.get_async_job(job_id)
+        if job is None:
+            return Response(
+                content=orjson.dumps(
+                    {"code": 404, "message": "Job not found", "data": None}
+                ),
+                media_type="application/json",
+                status_code=404,
+            )
+
+        return Response(
+            content=orjson.dumps({"code": 200, "message": "success", "data": job}),
+            media_type="application/json",
+        )
+
+    @app.get("/jobs")
+    async def get_async_jobs(
+        page: int = 1,
+        size: int = 10,
+        with_result: bool = False,
+    ) -> Response:
+        jobs = await async_job_manager.get_async_jobs(
+            page=page, size=size, with_result=with_result
+        )
+        return Response(
+            content=orjson.dumps({"code": 200, "message": "success", "data": jobs}),
+            media_type="application/json",
+        )
+
+    @app.get("/jobs/{job_id}/cancel")
+    async def cancel_async_job(job_id: str) -> Response:
+        cancelled = await async_job_manager.cancel_async_job(job_id)
+        if not cancelled:
+            return JSONResponse(
+                status_code=400,
+                content={"code": 400, "message": "Job not found", "data": None},
+            )
+
+        return JSONResponse(
+            status_code=200, content={"code": 200, "message": "success", "data": None}
+        )
 
     logger.info("FastAPI application initialized")
 
