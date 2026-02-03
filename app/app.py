@@ -49,6 +49,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     await app.state.openai_client.close()
     await app.state.httpx_client.aclose()
+    await async_engine.dispose()
 
     logger.info("Application shutdown completed")
 
