@@ -17,6 +17,7 @@ class AsyncJobManager:
     """异步任务管理器"""
 
     _instance: Self | None = None
+    _initialized: bool = False
 
     def __new__(cls) -> Self:
         if cls._instance is None:
@@ -24,6 +25,10 @@ class AsyncJobManager:
         return cls._instance
 
     def __init__(self) -> None:
+        if self._initialized:
+            return
+        self._initialized = True
+
         # 运行中的异步任务：job_id -> asyncio.Task，用于取消等操作
         self._async_tasks: dict[str, asyncio.Task] = {}
 
