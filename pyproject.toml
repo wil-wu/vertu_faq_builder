@@ -1,7 +1,7 @@
 [project]
-name = "vertu-algorithm-service"
+name = "vertu-faq-builder"
 version = "0.1.0"
-description = "vertu algorithm service"
+description = "vertu faq builder"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

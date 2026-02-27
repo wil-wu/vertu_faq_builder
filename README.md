@@ -1,6 +1,6 @@
-# Vertu Algorithm Service
+# Vertu FAQ Builder
 
-基于 FastAPI 的现代化算法服务模板,支持多服务架构、API 版本化、Docker 部署和可观测性。
+FAQ语料构建。
 
 ## 🚀 特性
 
@@ -19,7 +19,7 @@
 ## 📁 项目结构
 
 ```
-vertu_algorithm_service/
+vertu_faq_builder/
 ├── main.py                       # 应用启动入口
 ├── pyproject.toml                # 项目配置
 ├── uv.lock                       # 依赖锁定
@@ -71,14 +71,8 @@ vertu_algorithm_service/
 ### 1. 安装依赖
 
 ```bash
-# 使用 uv 初始化项目
-uv init
-
 # 安装依赖
 uv sync
-
-# 或者安装开发依赖
-uv sync --dev
 ```
 
 ### 2. 配置环境变量
