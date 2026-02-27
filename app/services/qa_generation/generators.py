@@ -246,6 +246,7 @@ class LLMQAGenerator(QAGenerator):
                 {"role": "user", "content": self.user_prompt.format(context=context)},
             ],
             temperature=self.temperature,
+            max_tokens=1024,
         )
         content = response.choices[0].message.content.strip()
         logger.debug(f"{self.__class__.__name__} response content: {content}")
