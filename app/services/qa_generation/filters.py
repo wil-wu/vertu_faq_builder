@@ -127,7 +127,14 @@ class LLMFilter(Filter):
     </注意事项>
 
     <产品型号列表>
-    VERTU AGENT Q 手机
+    IVERTU
+    METAVERTU
+    METAVERTU 2
+    SIGNATURE 4G
+    SIGNATURE S
+    VERTU AGENT Q
+    VERTU AGENT IRONFLIP
+    VERTU QUANTUM
     </产品型号列表>
     """
 
