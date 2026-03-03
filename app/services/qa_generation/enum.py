@@ -38,7 +38,6 @@ class ProductType(Enum):
     SIGNATURE_4G = "Signature 4G"
     SIGNATURE_S = "Signature S"
     VERTU_AGENT_Q = "VERTU AGENT Q"
-    VERTU_AGENT_IRONFLIP = "VERTU AGENT IRONFLIP"
     VERTU_QUANTUM = "VERTU QUANTUM"
 
     @classmethod

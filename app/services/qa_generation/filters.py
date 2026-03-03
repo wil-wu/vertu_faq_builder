@@ -133,7 +133,6 @@ class LLMFilter(Filter):
     SIGNATURE 4G
     SIGNATURE S
     VERTU AGENT Q
-    VERTU AGENT IRONFLIP
     VERTU QUANTUM
     </产品型号列表>
     """
