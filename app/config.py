@@ -16,9 +16,9 @@ class GlobalSettings(BaseSettings):
     )
 
     # 应用信息
-    app_name: str = Field(default="algorithm-service", description="应用名称")
+    app_name: str = Field(default="Vertu FAQ Builder", description="应用名称")
     app_version: str = Field(default="1.0.0", description="应用版本")
-    app_description: str = Field(default="算法服务API", description="应用描述")
+    app_description: str = Field(default="Vertu FAQ Builder", description="应用描述")
 
     debug: bool = Field(default=True, description="调试模式")
     log_level: str = Field(default="INFO", description="日志级别")
@@ -48,11 +48,11 @@ class GlobalSettings(BaseSettings):
 
     # OpenAI 配置
     openai_api_key: str = Field(
-        default="sk-qCcelhFLpFUV2zPPootzqPOtpzXnjNZg9fgfyJfMlSQTrKT2",
+        default="",
         description="OpenAI API 密钥",
     )
     openai_base_url: str = Field(
-        default="https://api.moonshot.cn/v1", description="OpenAI API 基础 URL"
+        default="", description="OpenAI API 基础 URL"
     )
 
     # Sentence Transformer 配置
