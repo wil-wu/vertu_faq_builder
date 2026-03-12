@@ -133,6 +133,7 @@ def create_app() -> FastAPI:
     async def get_async_job(job_id: str) -> Response:
         """根据任务 ID 获取单个异步任务详情。
 
+        ```
         Args:
             job_id: 任务唯一标识（UUID）。
 
@@ -157,6 +158,7 @@ def create_app() -> FastAPI:
 
         Response body (JSON schema, 不存在 404):
             {"code": 404, "message": "Job not found", "data": null}
+        ```
         """
         job = await async_job_manager.get_async_job(job_id)
         if job is None:
@@ -181,6 +183,7 @@ def create_app() -> FastAPI:
     ) -> Response:
         """分页获取异步任务列表。
 
+        ```
         Args:
             page: 页码，从 1 开始。
             size: 每页条数。
@@ -211,6 +214,7 @@ def create_app() -> FastAPI:
                     "size": 10
                 }
             }
+        ```
         """
         jobs = await async_job_manager.get_async_jobs(
             page=page, size=size, with_result=with_result
@@ -224,6 +228,7 @@ def create_app() -> FastAPI:
     async def cancel_async_job(job_id: str) -> Response:
         """取消指定 ID 的异步任务（仅对运行中任务生效）。
 
+        ```
         Args:
             job_id: 任务唯一标识（UUID）。
 
@@ -235,6 +240,7 @@ def create_app() -> FastAPI:
 
         Response body (JSON schema, 失败 400):
             {"code": 400, "message": "Job not found", "data": null}
+        ```
         """
         cancelled = await async_job_manager.cancel_async_job(job_id)
         if not cancelled:

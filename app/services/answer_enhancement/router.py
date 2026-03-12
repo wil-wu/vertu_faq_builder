@@ -30,6 +30,7 @@ async def answer_enhancement(
 ) -> Response:
     """同步对单个或批量问答进行答案增强。
 
+    ```
     Args:
         request: FastAPI 请求对象。
         return_file: 为 True 时以文件形式返回结果，否则返回 JSON 响应。
@@ -50,6 +51,7 @@ async def answer_enhancement(
                 "enhanced_answers": ["string", ...]
             }
         }
+    ```
     """
     body = AnswerEnhancementRequestAdapter.validate_json(await request.body())
     enhanced_answers = []
@@ -97,6 +99,7 @@ async def answer_enhancement_async(
 ) -> dict:
     """异步对单个或批量问答进行答案增强，返回任务 ID 供轮询结果。
 
+    ```
     Args:
         request: FastAPI 请求对象。
 
@@ -109,6 +112,7 @@ async def answer_enhancement_async(
 
     Response body (JSON schema):
         {"code": 200, "message": "success", "data": {"job_id": "string"}}
+    ```
     """
     body = AnswerEnhancementRequestAdapter.validate_json(await request.body())
     job_id = await async_job_manager.create_async_job(
