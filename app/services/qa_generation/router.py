@@ -36,7 +36,44 @@ async def generate_qa_from_body(
     return_file: bool = Query(default=False, description="是否返回文件"),
     qa_generation_service: QAGenerationService = Depends(get_qa_generation_service),
 ) -> Response:
-    """从Body生成QA"""
+    """从请求体中的会话数据同步生成 QA。
+
+    Args:
+        request: FastAPI 请求对象。
+        return_file: 为 True 时以文件形式返回结果，否则返回 JSON 响应。
+
+    Request body (JSON schema):
+        {
+            "data": [
+                {
+                    "messages": [
+                        {
+                            "role": "string",
+                            "content": "string",
+                            "datetime": "string (optional)"
+                        }
+                    ]
+                }
+            ],
+            "metadata": {}  // optional, arbitrary key-value
+        }
+
+    Returns:
+        Response: JSON 或文件下载响应。
+
+    Response body (JSON schema):
+        {
+            "code": 200,
+            "message": "success",
+            "data": {
+                "generated_count": 0,
+                "filtered_count": 0,
+                "post_processed_count": 0,
+                "total": 0,
+                "qas": [{"question": "...", "answer": "...", "metadata": {}}]
+            }
+        }
+    """
     body = QAGenerationRequestAdapter.validate_json(await request.body())
     chat_sessions = body["data"]
     metadata = body.get("metadata")
@@ -72,7 +109,44 @@ async def generate_qa_from_file(
     return_file: bool = Query(default=False, description="是否返回文件"),
     qa_generation_service: QAGenerationService = Depends(get_qa_generation_service),
 ) -> Response:
-    """从文件生成QA"""
+    """从上传的 JSON 文件中的会话数据同步生成 QA。
+
+    Args:
+        file: 上传的 JSON 文件。
+        return_file: 为 True 时以文件形式返回结果，否则返回 JSON 响应。
+
+    Request body (file content, JSON schema):
+        {
+            "data": [
+                {
+                    "messages": [
+                        {
+                            "role": "string",
+                            "content": "string",
+                            "datetime": "string (optional)"
+                        }
+                    ]
+                }
+            ],
+            "metadata": {}  // optional, arbitrary key-value
+        }
+
+    Returns:
+        Response: JSON 或文件下载响应。
+
+    Response body (JSON schema):
+        {
+            "code": 200,
+            "message": "success",
+            "data": {
+                "generated_count": 0,
+                "filtered_count": 0,
+                "post_processed_count": 0,
+                "total": 0,
+                "qas": [{"question": "...", "answer": "...", "metadata": {}}]
+            }
+        }
+    """
     body = QAGenerationRequestAdapter.validate_json(await file.read())
     chat_sessions = body["data"]
     metadata = body.get("metadata")
@@ -107,7 +181,33 @@ async def generate_qa_from_body_async(
     request: Request,
     qa_generation_service: QAGenerationService = Depends(get_qa_generation_service),
 ) -> dict:
-    """从Body异步生成QA"""
+    """从请求体中的会话数据异步生成 QA，返回任务 ID。
+
+    Args:
+        request: FastAPI 请求对象。
+
+    Request body (JSON schema):
+        {
+            "data": [
+                {
+                    "messages": [
+                        {
+                            "role": "string",
+                            "content": "string",
+                            "datetime": "string (optional)"
+                        }
+                    ]
+                }
+            ],
+            "metadata": {}  // optional, arbitrary key-value
+        }
+
+    Returns:
+        dict: 响应体。
+
+    Response body (JSON schema):
+        {"code": 200, "message": "success", "data": {"job_id": "string"}}
+    """
     body = QAGenerationRequestAdapter.validate_json(await request.body())
     chat_sessions = body["data"]
     metadata = body.get("metadata")
@@ -133,7 +233,33 @@ async def generate_qa_from_file_async(
     file: UploadFile,
     qa_generation_service: QAGenerationService = Depends(get_qa_generation_service),
 ) -> dict:
-    """从文件异步生成QA"""
+    """从上传的 JSON 文件中的会话数据异步生成 QA，返回任务 ID。
+
+    Args:
+        file: 上传的 JSON 文件。
+
+    Request body (file content, JSON schema):
+        {
+            "data": [
+                {
+                    "messages": [
+                        {
+                            "role": "string",
+                            "content": "string",
+                            "datetime": "string (optional)"
+                        }
+                    ]
+                }
+            ],
+            "metadata": {}  // optional, arbitrary key-value
+        }
+
+    Returns:
+        dict: 响应体。
+
+    Response body (JSON schema):
+        {"code": 200, "message": "success", "data": {"job_id": "string"}}
+    """
     body = QAGenerationRequestAdapter.validate_json(await file.read())
     chat_sessions = body["data"]
     metadata = body.get("metadata")

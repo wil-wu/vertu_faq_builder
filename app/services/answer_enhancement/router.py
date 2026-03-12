@@ -28,7 +28,29 @@ async def answer_enhancement(
         get_answer_enhancement_service
     ),
 ) -> Response:
-    """答案增强"""
+    """同步对单个或批量问答进行答案增强。
+
+    Args:
+        request: FastAPI 请求对象。
+        return_file: 为 True 时以文件形式返回结果，否则返回 JSON 响应。
+
+    Request body (JSON schema, 二选一):
+        单个: {"question": "string", "answer": "string"}
+        批量: [{"question": "string", "answer": "string"}, ...]
+
+    Returns:
+        Response: JSON 或文件下载响应。
+
+    Response body (JSON schema):
+        {
+            "code": 200,
+            "message": "success",
+            "data": {
+                "total": 0,
+                "enhanced_answers": ["string", ...]
+            }
+        }
+    """
     body = AnswerEnhancementRequestAdapter.validate_json(await request.body())
     enhanced_answers = []
 
@@ -73,7 +95,21 @@ async def answer_enhancement_async(
         get_answer_enhancement_service
     ),
 ) -> dict:
-    """答案增强异步"""
+    """异步对单个或批量问答进行答案增强，返回任务 ID 供轮询结果。
+
+    Args:
+        request: FastAPI 请求对象。
+
+    Request body (JSON schema, 二选一):
+        单个: {"question": "string", "answer": "string"}
+        批量: [{"question": "string", "answer": "string"}, ...]
+
+    Returns:
+        dict: 响应体。
+
+    Response body (JSON schema):
+        {"code": 200, "message": "success", "data": {"job_id": "string"}}
+    """
     body = AnswerEnhancementRequestAdapter.validate_json(await request.body())
     job_id = await async_job_manager.create_async_job(
         JobType.ANSWER_ENHANCEMENT, enhance_answer, body, answer_enhancement_service

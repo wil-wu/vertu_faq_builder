@@ -131,6 +131,33 @@ def create_app() -> FastAPI:
 
     @app.get("/jobs/{job_id}", tags=["Jobs"])
     async def get_async_job(job_id: str) -> Response:
+        """根据任务 ID 获取单个异步任务详情。
+
+        Args:
+            job_id: 任务唯一标识（UUID）。
+
+        Returns:
+            Response: 成功时返回任务详情，不存在时返回 404。
+
+        Response body (JSON schema, 成功 200):
+            {
+                "code": 200,
+                "message": "success",
+                "data": {
+                    "job_id": "string",
+                    "job_type": "qa_generation | answer_enhancement | unknown",
+                    "status": "pending | running | completed | cancelled | failed",
+                    "progress": 0,
+                    "result": {} | null,
+                    "error": "string | null",
+                    "created_at": "string (ISO datetime)",
+                    "updated_at": "string (ISO datetime)"
+                }
+            }
+
+        Response body (JSON schema, 不存在 404):
+            {"code": 404, "message": "Job not found", "data": null}
+        """
         job = await async_job_manager.get_async_job(job_id)
         if job is None:
             return Response(
@@ -152,6 +179,39 @@ def create_app() -> FastAPI:
         size: int = 10,
         with_result: bool = False,
     ) -> Response:
+        """分页获取异步任务列表。
+
+        Args:
+            page: 页码，从 1 开始。
+            size: 每页条数。
+            with_result: 为 True 时返回每条任务的 result 字段，否则不查该字段以节省开销。
+
+        Returns:
+            Response: 分页结果。
+
+        Response body (JSON schema):
+            {
+                "code": 200,
+                "message": "success",
+                "data": {
+                    "items": [
+                        {
+                            "job_id": "string",
+                            "job_type": "string",
+                            "status": "string",
+                            "progress": 0,
+                            "result": {} | null,
+                            "error": "string | null",
+                            "created_at": "string",
+                            "updated_at": "string"
+                        }
+                    ],
+                    "total": 0,
+                    "page": 1,
+                    "size": 10
+                }
+            }
+        """
         jobs = await async_job_manager.get_async_jobs(
             page=page, size=size, with_result=with_result
         )
@@ -162,6 +222,20 @@ def create_app() -> FastAPI:
 
     @app.get("/jobs/{job_id}/cancel", tags=["Jobs"])
     async def cancel_async_job(job_id: str) -> Response:
+        """取消指定 ID 的异步任务（仅对运行中任务生效）。
+
+        Args:
+            job_id: 任务唯一标识（UUID）。
+
+        Returns:
+            Response: 取消成功返回 200，任务不存在或无法取消返回 400。
+
+        Response body (JSON schema, 成功 200):
+            {"code": 200, "message": "success", "data": null}
+
+        Response body (JSON schema, 失败 400):
+            {"code": 400, "message": "Job not found", "data": null}
+        """
         cancelled = await async_job_manager.cancel_async_job(job_id)
         if not cancelled:
             return JSONResponse(
