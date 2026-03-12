@@ -4,19 +4,20 @@ from app.core.managers import async_job_manager
 from app.core.enum import JobStatus
 from .service import QAGenerationService
 from .utils import build_contexts
+from .models import ChatSession
 
 logger = logging.getLogger(__name__)
 
 
 async def generate_qa(
     job_id: str,
-    records: list[dict],
+    chat_sessions: list[ChatSession],
     metadata: dict,
     service: QAGenerationService,
 ) -> None:
     """QA 生成任务"""
     try:
-        contexts = build_contexts(records)
+        contexts = build_contexts(chat_sessions)
         filtered_qas = []
         generated_count = 0
         progress = 0

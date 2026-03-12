@@ -1,17 +1,16 @@
 from .config import qa_generation_service_settings
+from .models import ChatSession
 
 
-def build_contexts(records: list[dict]) -> list[str]:
-    """从 records 构建 context 列表"""
+def build_contexts(chat_sessions: list[ChatSession]) -> list[str]:
+    """从 chat_sessions 构建 context 列表"""
     contexts = []
-    for record in records:
-        contents = record.get("消息内容", [])
-        if not isinstance(contents, list):
-            continue
+    for chat_session in chat_sessions:
+        messages = chat_session["messages"]
         context = "\n".join(
             [
-                f"{idx + 1}. {content.get('sender', '').replace('\n', '')}: {content.get('content', '').replace('\n', '')}"
-                for idx, content in enumerate(contents)
+                f"{idx + 1}. {message["role"]}: {message["content"]}"
+                for idx, message in enumerate(messages)
             ]
         )
         if len(context) > qa_generation_service_settings.max_context_length:

@@ -1,7 +1,7 @@
 import orjson
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, UploadFile, Query
+from fastapi import APIRouter, Depends, UploadFile, Query, Request
 from fastapi.responses import Response
 
 from app.core.managers import async_job_manager
@@ -9,7 +9,7 @@ from app.core.enum import JobType
 from .jobs import generate_qa
 from .service import QAGenerationService
 from .deps import get_qa_generation_service
-from .models import QAGenerationBody
+from .models import ChatSession, QAGenerationRequestAdapter
 from .utils import build_contexts
 
 router = APIRouter(
@@ -19,10 +19,10 @@ router = APIRouter(
 
 
 async def _generate_qa(
-    records: list[dict], metadata: dict, qa_generation_service: QAGenerationService
+    chat_sessions: list[ChatSession], metadata: dict, qa_generation_service: QAGenerationService
 ) -> list[dict]:
     """生成QA"""
-    contexts = build_contexts(records)
+    contexts = build_contexts(chat_sessions)
 
     qas_result = await qa_generation_service.generate_qa(contexts)
     for qa_pair in qas_result["qas"]:
@@ -30,23 +30,23 @@ async def _generate_qa(
     return qas_result
 
 
-@router.post("/sync/generate_from_body", response_model=None)
+@router.post("/sync/generate_from_body")
 async def generate_qa_from_body(
-    body: QAGenerationBody,
+    request: Request,
     return_file: bool = Query(default=False, description="是否返回文件"),
     qa_generation_service: QAGenerationService = Depends(get_qa_generation_service),
 ) -> Response:
     """从Body生成QA"""
-
-    records = body.data.get("RECORDS", [])
-    metadata = body.metadata
+    body = QAGenerationRequestAdapter.validate_json(await request.body())
+    chat_sessions = body["data"]
+    metadata = body.get("metadata")
     if not metadata:
         metadata = {
             "source": "http request",
-            "datetime": datetime.now().isoformat(),
+            "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
 
-    qas_result = await _generate_qa(records, metadata, qa_generation_service)
+    qas_result = await _generate_qa(chat_sessions, metadata, qa_generation_service)
     content = orjson.dumps(
         {
             "code": 200,
@@ -66,21 +66,23 @@ async def generate_qa_from_body(
         return Response(content=content, media_type="application/json")
 
 
-@router.post("/sync/generate_from_file", response_model=None)
+@router.post("/sync/generate_from_file")
 async def generate_qa_from_file(
     file: UploadFile,
     return_file: bool = Query(default=False, description="是否返回文件"),
     qa_generation_service: QAGenerationService = Depends(get_qa_generation_service),
 ) -> Response:
     """从文件生成QA"""
+    body = QAGenerationRequestAdapter.validate_json(await file.read())
+    chat_sessions = body["data"]
+    metadata = body.get("metadata")
+    if not metadata:
+        metadata = {
+            "source": file.filename,
+            "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
 
-    records = orjson.loads(await file.read()).get("RECORDS", [])
-    metadata = {
-        "source": file.filename,
-        "datetime": datetime.now().isoformat(),
-    }
-
-    qas_result = await _generate_qa(records, metadata, qa_generation_service)
+    qas_result = await _generate_qa(chat_sessions, metadata, qa_generation_service)
     content = orjson.dumps(
         {
             "code": 200,
@@ -102,12 +104,13 @@ async def generate_qa_from_file(
 
 @router.post("/async/generate_from_body")
 async def generate_qa_from_body_async(
-    body: QAGenerationBody,
+    request: Request,
     qa_generation_service: QAGenerationService = Depends(get_qa_generation_service),
 ) -> dict:
     """从Body异步生成QA"""
-    records = body.data.get("RECORDS", [])
-    metadata = body.metadata
+    body = QAGenerationRequestAdapter.validate_json(await request.body())
+    chat_sessions = body["data"]
+    metadata = body.get("metadata")
     if not metadata:
         metadata = {
             "source": "http request",
@@ -115,7 +118,7 @@ async def generate_qa_from_body_async(
         }
 
     job_id = await async_job_manager.create_async_job(
-        JobType.QA_GENERATION, generate_qa, records, metadata, qa_generation_service
+        JobType.QA_GENERATION, generate_qa, chat_sessions, metadata, qa_generation_service
     )
 
     return {
@@ -131,14 +134,17 @@ async def generate_qa_from_file_async(
     qa_generation_service: QAGenerationService = Depends(get_qa_generation_service),
 ) -> dict:
     """从文件异步生成QA"""
-    records = orjson.loads(await file.read()).get("RECORDS", [])
-    metadata = {
-        "source": file.filename,
-        "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    }
+    body = QAGenerationRequestAdapter.validate_json(await file.read())
+    chat_sessions = body["data"]
+    metadata = body.get("metadata")
+    if not metadata:
+        metadata = {
+            "source": file.filename,
+            "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
 
     job_id = await async_job_manager.create_async_job(
-        JobType.QA_GENERATION, generate_qa, records, metadata, qa_generation_service
+        JobType.QA_GENERATION, generate_qa, chat_sessions, metadata, qa_generation_service
     )
 
     return {

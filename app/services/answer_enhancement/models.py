@@ -1,6 +1,13 @@
-from pydantic import BaseModel
+from typing import TypedDict
+
+from pydantic import TypeAdapter
 
 
-class AnswerEnhancementBody(BaseModel):
+class AnswerEnhancementRequest(TypedDict):
     question: str
     answer: str
+
+
+AnswerEnhancementRequestAdapter = TypeAdapter(
+    AnswerEnhancementRequest | list[AnswerEnhancementRequest]
+)

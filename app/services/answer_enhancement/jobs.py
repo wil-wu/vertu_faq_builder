@@ -3,14 +3,14 @@ import logging
 from app.core.managers import async_job_manager
 from app.core.enum import JobStatus
 from .service import AnswerEnhancementService
-from .models import AnswerEnhancementBody
+from .models import AnswerEnhancementRequest
 
 logger = logging.getLogger(__name__)
 
 
 async def enhance_answer(
     job_id: str,
-    body: AnswerEnhancementBody | list[AnswerEnhancementBody],
+    body: AnswerEnhancementRequest | list[AnswerEnhancementRequest],
     service: AnswerEnhancementService,
 ) -> None:
     """答案增强任务"""
@@ -22,7 +22,7 @@ async def enhance_answer(
             progress = 0
             for idx, item in enumerate(body):
                 enhanced_answer = await service.execute(
-                    question=item.question, answer=item.answer
+                    question=item["question"], answer=item["answer"]
                 )
                 enhanced_answers.append(enhanced_answer)
                 _progress = int((idx + 1) / total * 100)
@@ -34,7 +34,7 @@ async def enhance_answer(
                     )
         else:
             enhanced_answer = await service.execute(
-                question=body.question, answer=body.answer
+                question=body["question"], answer=body["answer"]
             )
             enhanced_answers.append(enhanced_answer)
             progress = 100
